@@ -6,69 +6,67 @@
  * @param {Map} [cache] - A map to cache cloned objects (internal use for circular references).
  * @returns {*} The deep cloned value.
  */
-function deepClone(value, cache = new Map()) {
-  // 1. Handle primitives and null/undefined
-  if (value === null || typeof value !== 'object') {
+function deepClone(value, seen = new WeakMap()) {
+  // Handle primitives and functions
+  if (value === null || typeof value !== "object") {
     return value;
   }
 
-  // 2. Handle circular references
-  if (cache.has(value)) {
-    return cache.get(value);
+  // Handle circular references
+  if (seen.has(value)) {
+    return seen.get(value);
   }
 
-  // 3. Handle Dates
+  // Date
   if (value instanceof Date) {
     return new Date(value.getTime());
   }
 
-  // 4. Handle RegExps
-  if (value instanceof RegExp) {
-    return new RegExp(value.source, value.flags);
-  }
+  // Array
+  if (Array.isArray(value)) {
+    const arr = [];
+    seen.set(value, arr);
 
-  // 5. Handle Sets
-  if (value instanceof Set) {
-    const clonedSet = new Set();
-    cache.set(value, clonedSet);
     for (const item of value) {
-      clonedSet.add(deepClone(item, cache));
+      arr.push(deepClone(item, seen));
     }
-    return clonedSet;
+
+    return arr;
   }
 
-  // 6. Handle Maps
+  // Map
   if (value instanceof Map) {
-    const clonedMap = new Map();
-    cache.set(value, clonedMap);
+    const map = new Map();
+    seen.set(value, map);
+
     for (const [key, val] of value) {
-      clonedMap.set(deepClone(key, cache), deepClone(val, cache));
+      map.set(
+        deepClone(key, seen),
+        deepClone(val, seen)
+      );
     }
-    return clonedMap;
+
+    return map;
   }
 
-  // 7. Handle Arrays and Plain/Custom Objects
-  // Create an object of the same prototype to preserve custom constructors if any
-  const prototype = Object.getPrototypeOf(value);
-  const clonedObj = Array.isArray(value) ? [] : Object.create(prototype);
+  // Set
+  if (value instanceof Set) {
+    const set = new Set();
+    seen.set(value, set);
 
-  // Cache the clone before deep cloning nested keys to resolve circular references
-  cache.set(value, clonedObj);
-
-  // Copy all own properties, including Symbols and non-enumerable properties
-  const keys = Reflect.ownKeys(value);
-  for (const key of keys) {
-    const descriptor = Object.getOwnPropertyDescriptor(value, key);
-    if (descriptor) {
-      // Recursively clone the value of the property
-      const clonedVal = deepClone(descriptor.value, cache);
-      
-      // Define the property on the cloned object with the same descriptor flags (enumerable, writable, configurable)
-      Object.defineProperty(clonedObj, key, {
-        ...descriptor,
-        value: clonedVal,
-      });
+    for (const item of value) {
+      set.add(deepClone(item, seen));
     }
+
+    return set;
+  }
+
+  // Object (preserve prototype)
+  const clonedObj = Object.create(Object.getPrototypeOf(value));
+  seen.set(value, clonedObj);
+
+  for (const key of Reflect.ownKeys(value)) {
+    clonedObj[key] = deepClone(value[key], seen);
   }
 
   return clonedObj;
