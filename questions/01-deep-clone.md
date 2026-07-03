@@ -15,11 +15,11 @@ Your implementation should handle:
 
 ## Solution
 
-You can view the full implementation here: [solutions/01-deep-clone.js](file:///Users/harishgautam/Desktop/Senior%20Javascript%20Interview/solutions/01-deep-clone.js).
+You can view the full implementation here: [solutions/01-deep-clone.js](https://github.com/harsh9975/Senior-Javascript-Interview/blob/master/solutions/01-deep-clone.js).
 
 ## Test Cases
 
-A comprehensive test suite is implemented in [tests/01-deep-clone.test.js](file:///Users/harishgautam/Desktop/Senior%20Javascript%20Interview/tests/01-deep-clone.test.js). The tests cover:
+A comprehensive test suite is implemented in [tests/01-deep-clone.test.js](https://github.com/harsh9975/Senior-Javascript-Interview/blob/master/tests/01-deep-clone.test.js). The tests cover:
 - Cloning basic primitives
 - Cloning nested arrays and objects
 - Cloning Map and Set instances (recursively key/value cloning)
