@@ -22,6 +22,11 @@ function deepClone(value, seen = new WeakMap()) {
     return new Date(value.getTime());
   }
 
+  // RegExp
+  if (value instanceof RegExp) {
+    return new RegExp(value.source, value.flags);
+  }
+
   // Array
   if (Array.isArray(value)) {
     const arr = [];
@@ -66,7 +71,13 @@ function deepClone(value, seen = new WeakMap()) {
   seen.set(value, clonedObj);
 
   for (const key of Reflect.ownKeys(value)) {
-    clonedObj[key] = deepClone(value[key], seen);
+    const desc = Object.getOwnPropertyDescriptor(value, key);
+    if (desc) {
+      if ('value' in desc) {
+        desc.value = deepClone(desc.value, seen);
+      }
+      Object.defineProperty(clonedObj, key, desc);
+    }
   }
 
   return clonedObj;
